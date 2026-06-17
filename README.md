@@ -27,7 +27,7 @@ This project is an end-to-end data analytics portfolio piece demonstrating the a
 
 **Key Highlights:**
 * **Data Processing:** Python (Pandas/NumPy) utilized for initial data validation, followed by Power Query for advanced ETL processes and duplicate resolution.
-* **Data Modeling:** A highly optimized star schema built within Power Pivot, utilizing DAX measures to calculate custom KPIs (CVR, CTR, Cost Per Purchase).
+* **Data Modeling:** A highly optimized Snowflake Schema built within Power Pivot, utilizing DAX measures to calculate custom KPIs (CVR, CTR, Cost Per Purchase).
 * **Dynamic Visualizations:** Custom helper tables incorporating logical cell functions (e.g., `=IF(H11="", "", H11)`) to handle blank values and ensure clean, dynamic chart rendering without visual anomalies.
 * **Dataset:** The analysis processes over 400,000 ad events and 10,000 users. To adhere to repository best practices, the raw `.csv` files are excluded via `.gitignore`. The original dataset can be downloaded directly from [Kaggle](https://www.kaggle.com/datasets/alperenmyung/social-media-advertisement-performance).
 
@@ -44,7 +44,7 @@ Build an attribution and optimization model that identifies the highest-converti
 **Technologies Used:**
 * **Python (Pandas, NumPy):** Utilized within a Jupyter Notebook for initial Exploratory Data Analysis (EDA), schema validation, and anomaly detection.
 * **Excel Power Query:** Served as the primary ETL tool to ingest raw CSVs, standardize data types, and resolve data anomalies (e.g., removing duplicate user IDs).
-* **Excel Power Pivot (DAX):** Used to construct a relational Star Schema and write custom DAX measures for calculating dynamic metrics like High-Value Velocity, CVR, and CPE.
+* **Excel Power Pivot (DAX):** Used to construct a relational Snowflake Schema and write custom DAX measures for calculating dynamic metrics like High-Value Velocity, CVR, and CPE.
 * **Excel (Front-end):** Dashboard design and visualization, leveraging conditional logic (e.g., `=IF()`) for clean dynamic reporting.
 
 **Repository Structure:**
@@ -58,7 +58,7 @@ Build an attribution and optimization model that identifies the highest-converti
 │   └── Raw/
 │       └── .gitkeep
 ├── Excel/                 # Core dashboard application
-│   └── Marketing_Campaign_Performance_Dashboard.xlsm
+│   └── Marketing_Campaign_Performance_Dashboard.xlsx
 ├── Python/                # Exploratory Data Analysis scripts
 │   └── inspection.ipynb
 ├── .gitignore             # Ignores large raw dataset files
@@ -133,7 +133,7 @@ With the data cleaned and staged, I loaded the tables into **Power Pivot** to co
 ![Data Model Schema](Assets/data_model.png)
 
 **The Relational Schema:**
-The model is built on a cascading, highly optimized **Star/Snowflake Schema**:
+The model is built on a cascading, highly optimized **Snowflake Schema**:
 * **Dimension Tables:** `Campaigns`, `Ads`, and `Users` handle the descriptive attributes, hierarchies, and filtering contexts.
 * **Fact Table:** `Ad Events` acts as the central fact table, capturing all transactional engagement data (400,000 rows).
 * **Relationships:** Configured strict 1-to-Many (`1:*`) relationships (e.g., `Campaigns` → `Ads` → `Ad Events` and `Users` → `Ad Events`). This ensures seamless cross-filtering and accurate DAX measure propagation without ambiguity.
@@ -198,6 +198,6 @@ The final Excel dashboard directly answers the core business questions defined a
    Navigate to the `/Python` folder and open `inspection.ipynb` in Jupyter Notebook or VS Code to view the initial data validation and anomaly detection steps.
 
 3. **Open the Dashboard:**
-   Navigate to the `/Excel` folder and open `Marketing_Campaign_Performance_Dashboard.xlsm`.
+   Navigate to the `/Excel` folder and open `Marketing_Campaign_Performance_Dashboard.xlsx`.
 
    *Note: The raw CSV files are excluded from this repository to adhere to file size limits and best practices. However, the data model and Power Query connections are fully preserved within the Excel file. If you wish to refresh the queries yourself, download the raw data from [Kaggle](https://www.kaggle.com/datasets/alperenmyung/social-media-advertisement-performance), extract the CSVs into the `/Dataset/Raw/` folder, and update the source file paths in Power Query.*
