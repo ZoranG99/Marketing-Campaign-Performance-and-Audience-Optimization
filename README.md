@@ -11,7 +11,7 @@
 
 ## 📋 Table of Contents
 1. [Project Overview](#1--project-overview)
-2. [The Business Problem](#2--the-business-problem)
+2. [The Business Problem & Analytical Framework](#2--the-business-problem--analytical-framework)
 3. [Tech Stack & File Structure](#3--tech-stack--file-structure)
 4. [Python Data Inspection](#4--python-data-inspection)
 5. [Data Cleaning & Power Query](#5--data-cleaning--power-query)
@@ -25,29 +25,40 @@
 
 This project is an end-to-end data analytics portfolio piece demonstrating the ability to transform raw marketing data into an interactive, executive-level Excel dashboard. By combining Python for exploratory data analysis with Power Query and DAX for robust data modeling, this dashboard provides actionable insights into campaign ROI, audience targeting gaps, and platform efficiency.
 
-**Key Highlights:**
+**Key Highlights**
+
 * **Data Processing:** Python (Pandas/NumPy) utilized for initial data validation, followed by Power Query for advanced ETL processes and duplicate resolution.
 * **Data Modeling:** A highly optimized Snowflake Schema built within Power Pivot, utilizing DAX measures to calculate custom KPIs (CVR, CTR, Cost Per Purchase).
 * **Dynamic Visualizations:** Custom helper tables incorporating logical cell functions (e.g., `=IF(H11="", "", H11)`) to handle blank values and ensure clean, dynamic chart rendering without visual anomalies.
 * **Dataset:** The analysis processes over 400,000 ad events and 10,000 users. To adhere to repository best practices, the raw `.csv` files are excluded via `.gitignore`. The original dataset can be downloaded directly from [Kaggle](https://www.kaggle.com/datasets/alperenmyung/social-media-advertisement-performance).
 
-## 2. 🎯 The Business Problem
+## 2. 🎯 The Business Problem & Analytical Framework
 
 **The Core Problem**
+
 The marketing team is deploying substantial budgets across multiple campaigns, platforms, and demographics, but lacks visibility into exactly which combinations drive actual purchases versus just empty impressions. This creates inefficient budget drain, high customer acquisition costs (CAC), and missed revenue opportunities.
 
-**The Goal**
+**The Project Goal**
+
 Build an attribution and optimization model that identifies the highest-converting audience segments, optimal ad formats, and peak engagement times to reallocate future spend effectively.
+
+**Business Questions Addressed**
+
+* **Executive Overview:** What is our total spend vs. engagement volume? Which campaigns drive the highest high-value velocity, and what does the core conversion funnel look like?
+* **Audience Targeting:** Who is actually converting by age/gender/geography, and is there a mismatch between our intended targets and real buyers?
+* **Creative Optimization:** Which platforms and ad formats (e.g., Stories vs. Video) deliver the best ROI, and what are our peak scheduling windows?
 
 ## 3. 🛠️ Tech Stack & File Structure
 
-**Technologies Used:**
+**Technologies Used**
+
 * **Python (Pandas, NumPy):** Utilized within a Jupyter Notebook for initial Exploratory Data Analysis (EDA), schema validation, and anomaly detection.
 * **Excel Power Query:** Served as the primary ETL tool to ingest raw CSVs, standardize data types, and resolve data anomalies (e.g., removing duplicate user IDs).
 * **Excel Power Pivot (DAX):** Used to construct a relational Snowflake Schema and write custom DAX measures for calculating dynamic metrics like High-Value Velocity, CVR, and CPE.
 * **Excel (Front-end):** Dashboard design and visualization, leveraging conditional logic (e.g., `=IF()`) for clean dynamic reporting.
 
-**Repository Structure:**
+**Repository Structure**
+
 ```text
 ├── Assets/                # Dashboard screenshots and schema diagrams
 │   ├── Page_1_Overview.png
@@ -69,12 +80,14 @@ Build an attribution and optimization model that identifies the highest-converti
 
 Before importing the raw dataset into Excel, I conducted an initial Exploratory Data Analysis (EDA) using Python (Pandas) within a Jupyter Notebook. This pre-processing step was critical for validating data integrity, understanding table schemas, and planning the relational data model.
 
-**Key Findings from the EDA:**
+**Key Findings from the EDA**
+
 * **High Data Quality:** Confirmed **0 missing values (NaNs)** and **0 exact duplicate rows** across all four datasets (totaling over 400,000 records).
 * **Crucial Anomaly Detected:** Discovered a primary key violation in the `users.csv` table. While the table contained 10,000 rows, the `.nunique()` function revealed only **9,950 unique `user_id`s**. Identifying this early dictated the exact deduplication strategy needed in Power Query to prevent "Many-to-Many" relationship errors during data modeling.
 * **Funnel Validation:** Verified that the categorical values in the `event_type` column naturally formed a realistic marketing funnel (339,812 Impressions → 40,079 Clicks → 2,031 Purchases).
 
-**Sample Inspection Script:**
+**Sample Inspection Script**
+
 ```python
 import pandas as pd
 
@@ -99,12 +112,14 @@ for name, df in datasets.items():
 
 With the initial inspection complete, I utilized Excel's **Power Query** as the ETL engine to ingest the raw CSV files, standardize the data types, and prepare the tables for relational modeling.
 
-**Key Transformation Steps:**
+**Key Transformation Steps**
+
 * **Duplicate Resolution (The PK Fix):** Applied `Table.Distinct` to the `Users` query to remove the duplicate `user_id` records identified during the Python EDA, ensuring a clean 1-to-Many relationship could be established.
 * **Text Formatting:** Cleaned the `name` column in the `Campaigns` table by removing the redundant "Campaign_" prefix (using `Table.ReplaceValue`), resulting in a cleaner UI for the dashboard slicers and charts.
 * **Type Standardization:** Strictly defined data types across all queries (e.g., converting `total_budget` to `Currency.Type` and `timestamp` to `DateTime.Date`) to optimize the data model's memory usage and DAX performance.
 
-**Sample Power Query (M Code) - Users & Campaigns:**
+**Sample Power Query (M Code) - Users & Campaigns**
+
 ```powerquery
 // Users Query: Resolving the duplicate Primary Key
 let
@@ -132,13 +147,15 @@ With the data cleaned and staged, I loaded the tables into **Power Pivot** to co
 
 ![Data Model Schema](Assets/data_model.png)
 
-**The Relational Schema:**
+**The Relational Schema**
+
 The model is built on a cascading, highly optimized **Snowflake Schema**:
 * **Dimension Tables:** `Campaigns`, `Ads`, and `Users` handle the descriptive attributes, hierarchies, and filtering contexts.
 * **Fact Table:** `Ad Events` acts as the central fact table, capturing all transactional engagement data (400,000 rows).
 * **Relationships:** Configured strict 1-to-Many (`1:*`) relationships (e.g., `Campaigns` → `Ads` → `Ad Events` and `Users` → `Ad Events`). This ensures seamless cross-filtering and accurate DAX measure propagation without ambiguity.
 
-**Custom DAX Measures:**
+**Custom DAX Measures**
+
 To translate raw counts into actionable business KPIs, I created a dedicated `_measures` table. Here are a few critical DAX calculations driving the dashboard:
 
 ```dax
@@ -161,17 +178,37 @@ Cost Per Purchase := DIVIDE([Total Budget], [Total Purchases])
 The final Excel dashboard directly answers the core business questions defined at the project's outset, moving stakeholders from high-level ROI down to tactical, actionable changes.
 
 ### Page 1: Executive Campaign Overview
+
+<details>
+<summary>Click here to view the Key Questions</summary>
+
+1. What is the total budget spent versus the total volume of engagements?
+2. Which specific campaigns are driving the highest volume of high-value events (Purchases and Clicks) relative to their duration?
+3. What does the overall marketing funnel look like (Impressions  Clicks  Purchases)?
+4. How much ad spend does it actually take to drive one user to buy?
+</details>
+
 ![Page 1 Overview](Assets/Page_1_Overview.png)
 
 * **Budget vs. Volume:** A total ad spend of **$2.54M** generated **400,000** total engagements. 
 * **Campaign Velocity:** Campaign **38_Q3** is driving the highest volume relative to its duration (46.9 high-value events/day), closely followed by **42_Summer** (35.4 events/day).
 * **Funnel Drop-off:** The overall funnel shows a steep but expected drop: **339,812 Impressions ➔ 40,079 Clicks ➔ 2,031 Purchases**.
+    > *Note: Funnel totals reflect core conversion path actions (**381,922** events); auxiliary engagement events (comments, likes, shares) are omitted to maintain funnel integrity.*
 * **Cost of Acquisition:** While the overall average Cost Per Purchase is **$1,249**, the most efficient outlier (*42_Summer*) acquires purchasing users for just **$118**.
 * **Audit Finding (Anomaly):** *Campaign 43_Winter* consumed an **$81,350** budget allocation but recorded zero tracking events, flagging a critical tracking failure or budget drain.
 
 ---
 
 ### Page 2: Audience & Demographic Targeting
+
+<details>
+<summary>Click here to view the Key Questions</summary>
+
+1. Which age groups and genders yield the highest conversion rates?
+2. Are there specific countries or localized regions outperforming the rest?
+3. Is there a gap between our intended audience (`target_interests`) and the actual users (`interests`) who are clicking and purchasing?
+</details>
+
 ![Page 2 Audience](Assets/Page_2_Audience.png)
 
 * **Top Converting Demographics:** The highest conversion rates (CVR) originate from non-traditional segments: the **45-54 "Other"** demographic (9.15%) and the **55-65 "Male"** group (7.34%).
@@ -181,6 +218,15 @@ The final Excel dashboard directly answers the core business questions defined a
 ---
 
 ### Page 3: Creative & Platform Optimization
+
+<details>
+<summary>Click here to view the Key Questions</summary>
+
+1. Which platform (Facebook vs. Instagram) delivers a more cost-effective engagement rate?
+2. What ad format (Video, Stories, Carousel, Image) is most successful at driving users to take action?
+3. What day of the week and time of day generate peak conversion volumes, indicating when ads should be scheduled?
+</details>
+
 ![Page 3 Creative](Assets/Page_3_Creative.png)
 
 * **Platform Efficiency:** **Facebook** is significantly more cost-effective, delivering a **$9.98 Cost Per Engagement (CPE)** compared to Instagram's $17.38, while also maintaining a slightly higher CVR (5.21% vs 4.82%).
